@@ -1,4 +1,4 @@
-from classes import Record, AddressBook, WrongPhoneFormat, WrongDateFormat
+from classes import Record, AddressBook, WrongPhoneFormat, WrongDateFormat, NotValidDate
 
 def input_error(func):
     def inner(*args, **kwargs):
@@ -12,6 +12,10 @@ def input_error(func):
             return "No such element in list"
         except WrongPhoneFormat:
             return print("Please provide a 10-digit number.")
+        except WrongDateFormat:
+            return print("Please provide date in the following format DD.MM.YYYY")
+        except NotValidDate:
+            return print("Please provide valid date")
 
     return inner
 
@@ -29,7 +33,6 @@ def add_contacts(args, book):
     record.add_phone(phone)
     if record == WrongPhoneFormat:
         pass
-        # print("Please provide a 10-digit number.")
     else:
         book.add_record(record)
         print('Contact added.')
@@ -45,11 +48,11 @@ def change_contact(args, book):
 
 
 @input_error
-def phone_username(args, contacts):
+def phone_username(args, book):
     name = args[0]
 
-    if name in contacts:
-        return contacts[name]
+    if book.find(name):
+        return print(book.find(name).phones[0])
     else:
         return "Contact not found."
 
@@ -61,11 +64,33 @@ def all_contacts(book):
             print(record)
     else:
         return "No contacts found."
+    
+
+@input_error
+def add_birthday(args, book):
+    name, date = args
+    record = book.find(name)
+    if record == None:
+        pass
+    else:
+        record.add_birthday(date)
+        print('Birthday added.')
+
+@input_error
+def show_birthday(args, book):
+    name = args[0]
+    if book.find(name):
+        return print(book.find(name).birthday)
+    else:
+        return "Contact not found."
+    
+@input_error
+def birthdays(book):
+    return print(book.birthdays())
 
 
 def main():
     book = AddressBook()
-    contacts = {}
     print("Welcome to the assistant bot!")
     while True:
         user_input = input("Enter a command: ")
@@ -81,9 +106,15 @@ def main():
         elif command == "change":
             change_contact(args, book)
         elif command == "phone":
-            print(phone_username(args, contacts))
+            phone_username(args, book)
         elif command == "all":
             all_contacts(book)
+        elif command == 'add-birthday':
+            add_birthday(args,book)
+        elif command == 'show-birthday':
+            show_birthday(args, book)
+        elif command == 'birthdays':
+            birthdays(book)
         else:
             print("Invalid command.")
 

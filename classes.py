@@ -1,11 +1,15 @@
 from collections import UserDict
 from datetime import datetime
 from get_birthdays import get_birthdays_per_week
+import re
 
 class WrongPhoneFormat(Exception):
     pass
 
 class WrongDateFormat(Exception):
+    pass
+
+class NotValidDate(Exception):
     pass
 
 class Field:
@@ -22,12 +26,14 @@ class Name(Field):
 
 class Birthday(Field):
     def __init__(self, date):
+        if not re.match(r"^\d{2}\.\d{2}\.\d{4}$", date):
+            raise WrongDateFormat
         try:
             datetime.strptime(date, "%d.%m.%Y")
         except ValueError:
             # Якщо виникає помилка, це означає, що рядок не відповідає формату дати
-            raise WrongDateFormat(
-                "Please provide a date in the following format DD.MM.YYYY "
+            raise NotValidDate(
+                "Please provide valid date"
             )
 
         super().__init__(date)
@@ -37,7 +43,7 @@ class Phone(Field):
     # реалізація класу
     # перевірка довжини номера
     def __init__(self, value):
-        if not len(str(value)) == 10:
+        if not re.match("^[0-9]{10}$", str(value)):
             raise WrongPhoneFormat("Please provide a 10-digit number.")
 
         super().__init__(value)
